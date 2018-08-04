@@ -1,7 +1,7 @@
 # GPCRSampling
 ## FOLDER DataPreparation
 *Contains pymol scripts for data preparation*
-* **FILE alignment_extractor.p**
+* **FILE alignment_extractor.p**\n
 *pymol script for extracting best rotation points of GPCR helices*
 ** need GPCR's helices borders for executing
 ## FILE GPCR-TM-table-identity-resis.csv
