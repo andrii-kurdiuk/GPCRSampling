@@ -6,5 +6,8 @@
 *input and output of alignment_extractor.p - file with GPCR structural information*
 * contain information about best rotation parameters
 * contain information about GPCR helices borders
+## FILE residues_aligner.p
+*extract rms_cur data for specific TM and specific GPCR pair*
+* need GPCR's helices borders for executing
 
 
