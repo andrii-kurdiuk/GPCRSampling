@@ -6,6 +6,8 @@ import time
 import pandas as pd
 import numpy as np
 
+SMOOTH_STEP = 5
+
 resns_a = set()
 resns_i = set()
 data = pd.read_csv('GPCR-TM6-table-identity-resis.csv', index_col=None)
@@ -318,7 +320,7 @@ def get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
         X = [x[0] for x in rms_cur_data]
         Y = [x[1] for x in rms_cur_data]
         clear_rms_array(Y)
-        smoothed_data = smooth_data(Y, 3)
+        smoothed_data = smooth_data(Y, SMOOTH_STEP)
         min_rms = get_min_rms(smoothed_data)
         x, y = get_min_resi(min_rms, X, Y)
 
