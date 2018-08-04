@@ -10,7 +10,7 @@ SMOOTH_STEP = 5
 
 resns_a = set()
 resns_i = set()
-data = pd.read_csv('GPCR-TM6-table-identity-resis.csv', index_col=None)
+data = pd.read_csv('GPCR-TM-table-identity-resis.csv', index_col=None)
 
 def get_angle(X, tg_resi, tm, tm_a_j):
 	
@@ -431,7 +431,7 @@ for idx in data['index']:
 	cmd.delete('gpcr_i')
 	
 
-data.to_csv('GPCR-TM6-table_new_version.csv', index=False)
+data.to_csv('GPCR-TM-table_new_version.csv', index=False)
 print 'finish process'
 print sorted(list(error_log))
 
