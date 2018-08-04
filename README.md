@@ -3,8 +3,8 @@
 *Contains pymol scripts for data preparation*
 * **FILE alignment_extractor.p**
 
- * Pymol script for extracting best rotation points of GPCR helices
- * Need GPCR's helices borders for executing
+  * Pymol script for extracting best rotation points of GPCR helices
+  * Need GPCR's helices borders for executing
 ## FILE GPCR-TM-table-identity-resis.csv
 *input and output of **alignment_extractor.p** - file with GPCR structural information*
 * contain information about best rotation parameters
