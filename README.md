@@ -5,15 +5,15 @@
 * **FILE alignment_extractor_general_alignment.p**
 
   * *Pymol script for extracting best rotation points of GPCR helices through alignment of whole GPCR.*
-  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-*.csv**.
+  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-general.csv**.
 * **FILE alignment_extractor_pair_alignment.p**
 
   * *Pymol script for extracting best rotation points of GPCR helices through pair alignment of GPCR helices.*
-  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis.csv**.
+  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-pair.csv**.
 * **FILE residues_aligner.p** 
 
   * *Pymol script which extracts rms_cur data for specific TM and specific GPCR pair.*
-  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis.csv**.
+  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-*.csv**.
 
 ## FOLDER DataAnalysis
 *Contains jupyter notebook and pymol scrips for data analysis.*
@@ -31,7 +31,7 @@
 * **helices_viewer.p**
 
   * *Pymol script for specific helix of specific GPCR pair overview.*
-  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis.csv**.
+  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-*.csv**.
   
 ## Folder Data
 *Contains data which is necessary for script execution*
