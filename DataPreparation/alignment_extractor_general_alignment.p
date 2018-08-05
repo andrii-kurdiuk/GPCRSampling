@@ -390,7 +390,7 @@ def get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
 	return min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, len(pro_resis), best_angle_b, best_angle_a
 
 error_log = set()
-for idx in range(5):
+for idx in data['index']:
 
 	i_name, i_begin, i_end, i_chain, a_name, a_begin, a_end, a_chain = get_gpcr_properties(idx)
 
