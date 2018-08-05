@@ -8,14 +8,26 @@ import numpy as np
 
 resns_a = set()
 resns_i = set()
-data = pd.read_csv('GPCR-TM-table-identity-resis.csv', index_col=None)
+a_resis = set()
+i_resis = set()
+data = pd.read_csv('GPCR-TM-table-identity-resis-general.csv', index_col=None)
 
 SMOOTH_STEP = 3
 
 def get_angle(X, tg_resi, tm, tm_a_j):
-	
-	angle_b = cmd.get_angle('model ' + 'tm' + str(tm) + '_i and resi ' + str(X[0]) + ' and name CA', 'model ' + 'tm' + str(tm) + '_i and resi ' + str(tg_resi) + ' and name CA', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(X[0] + tm_a_j) + ' and name CA')
-	angle_a = cmd.get_angle('model ' + 'tm' + str(tm) + '_i and resi ' + str(X[-1]) + ' and name CA', 'model ' + 'tm' + str(tm) + '_i and resi ' + str(tg_resi) + ' and name CA', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(X[-1] + tm_a_j) + ' and name CA')
+
+	cmd.iterate('model ' + 'tm' + str(tm) + '_a', 'a_resis.add(resi)')
+	a_begin = int(sorted(list(a_resis))[0])
+	a_end = int(sorted(list(a_resis))[-1])
+	a_resis.clear()
+
+	cmd.iterate('model ' + 'tm' + str(tm) + '_i', 'i_resis.add(resi)')
+	i_begin = int(sorted(list(i_resis))[0])
+	i_end = int(sorted(list(i_resis))[-1])
+	i_resis.clear()
+
+	angle_b = cmd.get_angle('model ' + 'tm' + str(tm) + '_i and resi ' + str(i_begin) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_i and resi ' + str(tg_resi) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(a_begin + tm_a_j) + ' and name CA and alt A+\"\"')
+	angle_a = cmd.get_angle('model ' + 'tm' + str(tm) + '_i and resi ' + str(i_end) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_i and resi ' + str(tg_resi) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(a_end + tm_a_j) + ' and name CA and alt A+\"\"')
     	return angle_b, angle_a
 
 def clear_rms_array(Y):
@@ -140,6 +152,7 @@ def get_resis_resns(model):
 	return resis, pro_resis
 
 def get_transforms(n_resi, tm_i_begin, tm_i_end, tm):
+
 	cmd.create('tm_i_before_exclusive', 'model tm' + str(tm) + '_i and resi ' + str(tm_i_begin) + '-' + str(n_resi - 1))
 	cmd.create('tm_i_after_inclusive', 'model tm' + str(tm) + '_i and resi ' + str(n_resi) + '-' + str(tm_i_end))
 
@@ -148,10 +161,11 @@ def get_transforms(n_resi, tm_i_begin, tm_i_end, tm):
 	cmd.align('tm_i_after_inclusive', 'tm' + str(tm) + '_a')
 	transform_after = cmd.get_object_matrix('tm_i_after_inclusive')
 
-	cmd.create('tm_i_transformed', 'model tm_i_after_inclusive or model tm_i_before_exclusive')
+	cmd.create('tm_i_transformed', 'tm_i_after_inclusive or tm_i_before_exclusive')
+
 	cmd.delete('tm_i_before_exclusive')
 	cmd.delete('tm_i_after_inclusive')
-	
+
 	rmsd = get_rmsd('tm_i_transformed', 'tm' + str(tm) + '_a', 0)
 	cmd.delete('tm_i_transformed')
 
@@ -167,8 +181,9 @@ def get_axis_angle(matrix):
 
 	return axis, angle
 
-def get_best_transforms_old(tm_i_begin, tm_i_end, tm):
+def get_best_transforms_old(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
 
+	
 	min_rmsd = 100.0
 	min_resi = 0.0
 	pro_rmsd = 100.0
@@ -185,6 +200,8 @@ def get_best_transforms_old(tm_i_begin, tm_i_end, tm):
 	resis, pro_resis = get_resis_resns('tm' + str(tm) + '_i')
 	pro_status = True
 
+	
+
 	if len(pro_resis) == 1:
 		if pro_resis[0] == 0:
 			pro_transform_b = 'noPRO'
@@ -196,12 +213,14 @@ def get_best_transforms_old(tm_i_begin, tm_i_end, tm):
 			pro_transform_a = 'PRO is in the end'
 			pro_status = False
 			pro_resi = pro_resis[0]
+
 	
 	for n_resi in resis:
 
 		if n_resi > tm_i_begin:
-
+			
 			transform_before, transform_after, rmsd = get_transforms(n_resi, tm_i_begin, tm_i_end, tm)
+			
 			if rmsd < min_rmsd:
 				min_rmsd = rmsd
 				min_resi = n_resi
@@ -219,7 +238,7 @@ def get_best_transforms_old(tm_i_begin, tm_i_end, tm):
 				pro_nums.append(n_resi)
 				pro_rmsd = min(pro_rmsds)
 
-
+	
 	if len(pro_resis) > 1:
 		for rmsd_it, trans_b_it, trans_a_it, pro_num in zip(pro_rmsds, pro_transforms_b, pro_transforms_a, pro_nums):
 			if rmsd_it == pro_rmsd:
@@ -371,7 +390,7 @@ def get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
 	return min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, len(pro_resis), best_angle_b, best_angle_a
 
 error_log = set()
-for idx in data['index']:
+for idx in range(5):
 
 	i_name, i_begin, i_end, i_chain, a_name, a_begin, a_end, a_chain = get_gpcr_properties(idx)
 
@@ -404,8 +423,10 @@ for idx in data['index']:
 			cmd.create('tm' + str(tm) + '_i', 'model gpcr_i and resi ' + str(tm_i_begin) + '-' + str(tm_i_end))
 
 			resis = dict()
+
+			min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, n_of_pro, best_angle_b, best_angle_a = get_best_transforms_old(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm)
+
 			
-			min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, n_of_pro, best_angle_b, best_angle_a = get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm)
 
 			rmsd_i_a = get_rmsd('tm' + str(tm) + '_i', 'tm' + str(tm) + '_a', 0)
 
@@ -445,7 +466,7 @@ for idx in data['index']:
 	cmd.delete('gpcr_i')
 	
 
-data.to_csv('GPCR-TM-table_new_version.csv', index=False)
+data.to_csv('GPCR-TM-table-identity-resis-general.csv', index=False)
 print 'finish process'
 print sorted(list(error_log))
 

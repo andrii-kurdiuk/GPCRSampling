@@ -128,6 +128,12 @@ for x, y in zip(X, Y):
 	data = data.append(s, ignore_index=True)
 
 data.to_csv('aligned_residues.csv', sep = ',')
-
-print 'done check'
+#smoothed_data = smooth_data(Y)
+#min_rms = get_min_rms(smoothed_data)
+#x, y = get_min_resi(min_rms, X, Y)
+#target_resn = set()
+#print x, y, get_resn_by_resi(x, target_resn)
+#print X[0], X[-1]
+#print get_angle(X, x)
+print 'done'
 python end

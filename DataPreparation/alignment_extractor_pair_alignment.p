@@ -6,11 +6,11 @@ import time
 import pandas as pd
 import numpy as np
 
-SMOOTH_STEP = 5
-
 resns_a = set()
 resns_i = set()
-data = pd.read_csv('GPCR-TM-table-identity-resis.csv', index_col=None)
+data = pd.read_csv('GPCR-TM-table-identity-resis-pair.csv', index_col=None)
+
+SMOOTH_STEP = 3
 
 def get_angle(X, tg_resi, tm, tm_a_j):
 	
@@ -393,8 +393,11 @@ for idx in data['index']:
 			cmd.create('tm' + str(tm) + '_i', 'model gpcr_i and resi ' + str(tm_i_begin) + '-' + str(tm_i_end))
 
 			resis = dict()
+			
 			min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, n_of_pro, best_angle_b, best_angle_a = get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm)
+
 			rmsd_i_a = get_rmsd('tm' + str(tm) + '_i', 'tm' + str(tm) + '_a', 0)
+
 			best_point = min_resn
 			best_point_resi = min_resi
 			best_axis_b, _ = get_axis_angle(best_transform_b)
@@ -431,7 +434,7 @@ for idx in data['index']:
 	cmd.delete('gpcr_i')
 	
 
-data.to_csv('GPCR-TM-table_new_version.csv', index=False)
+data.to_csv('GPCR-TM-table-identity-resis-pair.csv', index=False)
 print 'finish process'
 print sorted(list(error_log))
 
