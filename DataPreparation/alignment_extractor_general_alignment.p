@@ -15,17 +15,18 @@ data = pd.read_csv('GPCR-TM-table-identity-resis-general.csv', index_col=None)
 SMOOTH_STEP = 3
 
 def get_angle(X, tg_resi, tm, tm_a_j):
-
+	
 	cmd.iterate('model ' + 'tm' + str(tm) + '_a', 'a_resis.add(resi)')
 	a_begin = int(sorted(list(a_resis))[0])
 	a_end = int(sorted(list(a_resis))[-1])
 	a_resis.clear()
-
+	
 	cmd.iterate('model ' + 'tm' + str(tm) + '_i', 'i_resis.add(resi)')
 	i_begin = int(sorted(list(i_resis))[0])
 	i_end = int(sorted(list(i_resis))[-1])
 	i_resis.clear()
 
+	tm_a_j = 0
 	angle_b = cmd.get_angle('model ' + 'tm' + str(tm) + '_i and resi ' + str(i_begin) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_i and resi ' + str(tg_resi) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(a_begin + tm_a_j) + ' and name CA and alt A+\"\"')
 	angle_a = cmd.get_angle('model ' + 'tm' + str(tm) + '_i and resi ' + str(i_end) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_i and resi ' + str(tg_resi) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(a_end + tm_a_j) + ' and name CA and alt A+\"\"')
     	return angle_b, angle_a
@@ -132,8 +133,16 @@ def add_gpcr_properties(data, idx, rmsd_i_a, best_point, best_point_resi, best_a
 	data[tm_name + 'NofPRO'][idx] = n_of_pro
 
 def get_rmsd(obj_1, obj_2, trans):
-	rmsd = cmd.rms_cur(obj_1, obj_2, matchmaker = 1)
-	return rmsd
+	rmsd = cmd.rms_cur(obj_1 + ' and alt A+\"\"', obj_2 + ' and alt A+\"\"', matchmaker = 1)
+	if rmsd == -1:
+		try:
+			rmsd = cmd.rms_cur(obj_1 + ' and alt A+\"\"', obj_2 + ' and alt A+\"\"', matchmaker = -1)
+			print rmsd
+			return rmsd
+		except:
+			print rmsd
+			return rmsd
+
 
 def get_resis_resns(model):
 	
@@ -153,12 +162,12 @@ def get_resis_resns(model):
 
 def get_transforms(n_resi, tm_i_begin, tm_i_end, tm):
 
-	cmd.create('tm_i_before_exclusive', 'model tm' + str(tm) + '_i and resi ' + str(tm_i_begin) + '-' + str(n_resi - 1))
-	cmd.create('tm_i_after_inclusive', 'model tm' + str(tm) + '_i and resi ' + str(n_resi) + '-' + str(tm_i_end))
+	cmd.create('tm_i_before_exclusive', 'model tm' + str(tm) + '_i and resi ' + str(tm_i_begin) + '-' + str(n_resi - 1) + ' and alt A+\"\"')
+	cmd.create('tm_i_after_inclusive', 'model tm' + str(tm) + '_i and resi ' + str(n_resi) + '-' + str(tm_i_end) + ' and alt A+\"\"')
 
-	cmd.align('tm_i_before_exclusive', 'tm' + str(tm) + '_a')
+	cmd.align('tm_i_before_exclusive', 'tm' + str(tm) + '_a and alt A+\"\"')
 	transform_before = cmd.get_object_matrix('tm_i_before_exclusive')
-	cmd.align('tm_i_after_inclusive', 'tm' + str(tm) + '_a')
+	cmd.align('tm_i_after_inclusive', 'tm' + str(tm) + '_a and alt A+\"\"')
 	transform_after = cmd.get_object_matrix('tm_i_after_inclusive')
 
 	cmd.create('tm_i_transformed', 'tm_i_after_inclusive or tm_i_before_exclusive')
@@ -258,6 +267,7 @@ def get_best_transforms_old(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
 		tm_a_j = 0
 
 	X = range(tm_i_begin, tm_i_end + 1)
+	
 	best_angle_b, best_angle_a = get_angle(X, min_resi, tm, tm_a_j)
 
 	return min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, len(pro_resis), best_angle_b, best_angle_a
@@ -280,7 +290,7 @@ def get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
 	resis, pro_resis = get_resis_resns('tm' + str(tm) + '_i')
 	pro_status = True
 
-	cmd.align('tm' + str(tm) + '_i', 'tm' + str(tm) + '_a')	
+	cmd.align('tm' + str(tm) + '_i and alt A+\"\"', 'tm' + str(tm) + '_a and alt A+\"\"')	
 	
 	if len(pro_resis) == 1:
 		if pro_resis[0] == 0:
@@ -390,7 +400,7 @@ def get_best_transforms(tm_i_begin, tm_i_end, tm_a_begin, tm_a_end, tm):
 	return min_rmsd, min_resi, min_resn, best_transform_b, best_transform_a, pro_rmsd, pro_resi, pro_transform_b, pro_transform_a, len(pro_resis), best_angle_b, best_angle_a
 
 error_log = set()
-for idx in data['index']:
+for idx in [37]:
 
 	i_name, i_begin, i_end, i_chain, a_name, a_begin, a_end, a_chain = get_gpcr_properties(idx)
 

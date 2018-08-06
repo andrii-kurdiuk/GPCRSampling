@@ -5,11 +5,12 @@ from collections import defaultdict
 import time
 import pandas as pd
 
-a_name = u'5g53'
-i_name = u'3pwh'
-tm = 7
+a_name = '5t04'
+i_name = '3zev'
+tm = 5
+ALIGNMENT = True
 
-data = pd.read_csv('GPCR-TM-table-identity-resis.csv', index_col=None)
+data = pd.read_csv('GPCR-TM-table-identity-resis-pair.csv', index_col=None)
 
 def get_row_index(data, a_name, i_name):
 	for idx in data.index:
@@ -19,21 +20,23 @@ def get_row_index(data, a_name, i_name):
 			return idx	
 
 def clear_rms_array(Y):
-    for idx, y in enumerate(Y):
-        print 'here'
-        if y == -1:
-            if (idx - 1) >= 0 and (idx + 1) < len (Y):
-                if Y[idx + 1] != -1:
-                    Y[idx] = (Y[idx + 1] + Y[idx - 1]) / 2.
-                else:
-                    Y[idx] = Y[idx - 1]
-            elif (idx - 1) > 0:
-                Y[idx] = Y[idx -1]
-            elif (idx + 1) < len(Y):
-                if Y[idx + 1] != -1:
-                    Y[idx] = Y[idx + 1]
-                else:
-                    Y[idx] = np.mean(np.array(Y))
+	T = Y
+	for idx, y in enumerate(T):
+
+		if y == -1 or y == 0:
+			if (idx - 1) >= 0 and (idx + 1) < len (T):
+				if T[idx + 1] != -1 and T[idx + 1] != 0:
+					T[idx] = (T[idx + 1] + T[idx - 1]) / 2.
+				else:
+					T[idx] = T[idx - 1]
+			elif (idx - 1) > 0:
+				T[idx] = T[idx -1]
+			elif (idx + 1) < len(T):
+				if T[idx + 1] != -1 and T[idx + 1] != 0:
+					T[idx] = T[idx + 1]
+				else:
+					T[idx] = [i for i in Y if i > 0][0]
+	return T
                 
 def smooth_data(Y):
     sum_rms = []
@@ -87,24 +90,46 @@ tm_i_begin = int(data['TM' + str(tm) + '_inactive'][idx].split('-')[0])
 tm_i_end = int(data['TM' + str(tm) + '_inactive'][idx].split('-')[1])
 tm_a_begin = int(data['TM' + str(tm) + '_active'][idx].split('-')[0])
 tm_a_end = int(data['TM' + str(tm) + '_active'][idx].split('-')[1])
+i_begin = int(data['TM1_inactive'][idx].split('-')[0])
+i_end = int(data['TM7_inactive'][idx].split('-')[1])
+a_begin = int(data['TM1_active'][idx].split('-')[0])
+a_end = int(data['TM7_active'][idx].split('-')[1])
 
-
-cmd.create('tm' + str(tm) + '_a', 'model ' + a_name + ' and chain ' + a_chain + ' and resi ' + str(tm_a_begin) + '-' + str(tm_a_end) + ' and alt A+\"\"')
-cmd.create('tm' + str(tm) + '_i', 'model ' + i_name + ' and chain ' + i_chain + ' and resi ' + str(tm_a_begin) + '-' + str(tm_a_end) + ' and alt A+\"\"')
+cmd.create('gpcr_a', 'model ' + a_name + ' and chain ' + a_chain + ' and resi ' + str(a_begin) + '-' + str(a_end) + ' and alt A+\"\"')
+cmd.create('gpcr_i', 'model ' + i_name + ' and chain ' + i_chain + ' and resi ' + str(i_begin) + '-' + str(i_end) + ' and alt A+\"\"')
 
 cmd.delete(i_name)
 cmd.delete(a_name)
 
-cmd.align('tm' + str(tm) + '_i', 'tm' + str(tm) + '_a')
+if ALIGNMENT:
+	cmd.align('gpcr_i', 'gpcr_a', transform=1)
+
+cmd.create('tm' + str(tm) + '_a', 'model gpcr_a and chain ' + a_chain + ' and resi ' + str(tm_a_begin) + '-' + str(tm_a_end) + ' and alt A+\"\"')
+cmd.create('tm' + str(tm) + '_i', 'model gpcr_i and chain ' + i_chain + ' and resi ' + str(tm_i_begin) + '-' + str(tm_i_end) + ' and alt A+\"\"')
+
+cmd.delete(i_name)
+cmd.delete(a_name)
+
+if not ALIGNMENT:
+	cmd.align('tm' + str(tm) + '_i', 'tm' + str(tm) + '_a')
 
 resns_a = set()
 resns_i = set()
 rms_cur_data = list()
 
-for j in range(tm_a_begin, tm_a_end + 1):
-	cmd.iterate('model tm' + str(tm) + '_a and resi ' + str(j), 'resns_a.add(resn)')
-	cmd.iterate('model tm' + str(tm) + '_i and resi ' + str(j), 'resns_i.add(resn)')
+for j in range(tm_i_begin, tm_i_end + 1):
+
+	tm_a_j = None
+	if tm_a_begin > 1000 and tm_i_begin < 1000:
+		tm_a_j = j + 1000
+	elif tm_a_begin < 1000 and tm_i_begin > 1000:
+		tm_a_j = j - 1000
+	else:
+		tm_a_j = j
+	cmd.iterate('model ' + 'tm' + str(tm) + '_a and resi ' + str(tm_a_j), 'resns_a.add(resn)')
+	cmd.iterate('model ' + 'tm' + str(tm) + '_i and resi ' + str(j), 'resns_i.add(resn)')
 	if not resns_a or not resns_i:
+		rms_cur_data.append([j, 0])
 		continue
 
 	resn_a = list(resns_a)[0]
@@ -112,14 +137,17 @@ for j in range(tm_a_begin, tm_a_end + 1):
 	resns_a.clear()
 	resns_i.clear()
 	if resn_a != resn_i:
+		rms_cur_data.append([j, 0])
 		continue
 
-	rms_cur = cmd.rms_cur('model tm' + str(tm) + '_a and resi ' + str(j), 'model tm' + str(tm) + '_i and resi ' + str(j), matchmaker=-1)
+	rms_cur = cmd.rms_cur('model ' + 'tm' + str(tm) + '_i and resi ' + str(j) + ' and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(tm_a_j) + ' and alt A+\"\"', matchmaker = 1)
+
+	if rms_cur == -1:
+			rms_cur = cmd.get_distance('model ' + 'tm' + str(tm) + '_i and resi ' + str(j) + ' and name CA and alt A+\"\"', 'model ' + 'tm' + str(tm) + '_a and resi ' + str(tm_a_j) + ' and name CA and alt A+\"\"')
 	rms_cur_data.append([j, rms_cur])
 
 X = [x[0] for x in rms_cur_data]
 Y = [x[1] for x in rms_cur_data]
-#clear_rms_array(Y)
 
 data = pd.DataFrame(columns=['resi', 'rms'])
 
@@ -128,12 +156,5 @@ for x, y in zip(X, Y):
 	data = data.append(s, ignore_index=True)
 
 data.to_csv('aligned_residues.csv', sep = ',')
-#smoothed_data = smooth_data(Y)
-#min_rms = get_min_rms(smoothed_data)
-#x, y = get_min_resi(min_rms, X, Y)
-#target_resn = set()
-#print x, y, get_resn_by_resi(x, target_resn)
-#print X[0], X[-1]
-#print get_angle(X, x)
 print 'done'
 python end
