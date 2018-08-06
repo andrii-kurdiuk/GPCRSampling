@@ -2,8 +2,8 @@ python
 
 import pandas as pd
 
-a_name = '5g53'
-i_name = '3vg9'
+a_name = '5t04'
+i_name = '3zev'
 tm = 5
 
 data = pd.read_csv('GPCR-TM-table-identity-resis-pair.csv', index_col=None)
