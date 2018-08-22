@@ -31,13 +31,17 @@
   * *Jupyter notebook script for analysis of specific aligneg GPCR pair and specific TM.*
   * Uses **residues_aligner.p** from folder **DataPreparation** to obtain data.
   * Uses file **aligned_residues.csv** from folder **Data** as input data.
-  
-* **helices_viewer.p**
+* **FILE helices_viewer.p**
 
   * *Pymol script for specific helix of specific GPCR pair overview.*
   * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-*.csv**.
+* **FILE directions_analysis.ipynb**
+
+  * *Jupyter notebook scrip for bend direction analysis*
+  * Uses file **helices-direction-preparation.p** from folder **DataPreparation** to obtain data.
+  * Uses file **FILE GPCR-TM-table-directions.csv** from folder **Data** as input data
   
-## Folder Data
+## FOLDER Data
 *Contains data which is necessary for script execution*
 * **FILE GPCR-TM-table-identity-resis-pair.csv**
 
@@ -56,8 +60,8 @@
   * *Input for **aligned_residues_analysis.ipynb**.*
   * *Output of **residues_aligner.p**.*
   * Contains information about specific TM alignment.
-  
-* **GPCR-TM-table-directions.csv**
+* **FILE GPCR-TM-table-directions.csv**
+
   * *Input for **helices-direction-preparation.p**.*
   * *Output of **helices-direction-preparation.p**.*
   * Contains information about helices bend direction.
