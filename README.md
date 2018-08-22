@@ -14,6 +14,10 @@
 
   * *Pymol script which extracts rms_cur data for specific TM and specific GPCR pair.*
   * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-*.csv**.
+* **FILE helices-direction-preparation.p**
+
+  * *Pymol script for delices bend direction analysis.*
+  * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-directions.csv**.
 
 ## FOLDER DataAnalysis
 *Contains jupyter notebook and pymol scrips for data analysis.*
@@ -52,3 +56,8 @@
   * *Input for **aligned_residues_analysis.ipynb**.*
   * *Output of **residues_aligner.p**.*
   * Contains information about specific TM alignment.
+  
+* **GPCR-TM-table-directions.csv**
+  * *Input for **helices-direction-preparation.p**.*
+  * *Output of **helices-direction-preparation.p**.*
+  * Contains information about helices bend direction.
