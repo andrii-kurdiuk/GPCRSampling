@@ -8,7 +8,7 @@
   * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-general.csv**.
 * **FILE alignment_extractor_pair_alignment.p**
 
-  * *Pymol script for extracting best rotation points of GPCR helices through pair alignment of GPCR helices.*
+  * *Pymol script for extracting best rotation points of GPCR helices through pair alignment of GPCR helices. Alinment is processed with exponential smooth with step = 0.5*
   * Need GPCR's helices borders for executing. Borders could be fond in folder **Data** file **GPCR-TM-table-identity-resis-pair.csv**.
 * **FILE residues_aligner.p** 
 
