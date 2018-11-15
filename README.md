@@ -65,3 +65,8 @@
   * *Input for **helices-direction-preparation.p**.*
   * *Output of **helices-direction-preparation.p**.*
   * Contains information about helices bend direction.
+  
+* **GPCR-TM-table-directions-marked-fixed.csv**
+  * *Output of **directions_analysis.ipynb**.*
+  * Contains information about bend directions with polar coordinates marks.
+  * Distances are measured between identical residues.
